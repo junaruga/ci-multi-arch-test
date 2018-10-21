@@ -25,7 +25,7 @@ matrix:
       env:
         - BUILD_TYPE="arch-simple"
         - ARCH=armhf
-    - name: ppc64el-linux-simple
+    - name: ppc64le-linux-simple
       sudo: required
       env:
         - BUILD_TYPE="arch-simple"
