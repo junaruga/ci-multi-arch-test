@@ -1,0 +1,13 @@
+runtime:
+  - nodePool: shippable_shared_aarch64
+  - nodePool: shippable_shared_aarch32
+  - nodePool: default_node_pool
+language: none
+build:
+  ci:
+    # Show environment.
+    - uname -a
+    - id
+    - pwd
+    # Test.
+    - ./sample_test.sh
