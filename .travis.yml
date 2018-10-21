@@ -8,51 +8,63 @@ matrix:
     - name: aarch64-linux
       sudo: required
       env:
+        - BUILD_TYPE="arch"
         - ARCH=arm64
-      install:
-        # Prepare QEMU.
-        # https://github.com/multiarch/qemu-user-static
-        # https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
-        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-        # Build container image.
-        - |
-          docker build --rm -t sample -f Dockerfile-${ARCH} .
-      script: |
-        docker run --rm -t sample ./sample_test.sh
     - name: i386-linux-simple
       sudo: required
       env:
+        - BUILD_TYPE="arch-simple"
         - ARCH=i386
-      install: &prepare_qemu
-        - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-      script: &test_arch
-        - |
-          docker run --rm -t multiarch/ubuntu-debootstrap:${ARCH}-bionic uname -a
     - name: aarch64-linux-simple
       sudo: required
       env:
+        - BUILD_TYPE="arch-simple"
         - ARCH=arm64
-      install: *prepare_qemu
-      script: *test_arch
     - name: armv7l-linux-simple
       sudo: required
       env:
+        - BUILD_TYPE="arch-simple"
         - ARCH=armhf
-      install: *prepare_qemu
-      script: *test_arch
     - name: ppc64el-linux-simple
       sudo: required
       env:
+        - BUILD_TYPE="arch-simple"
         - ARCH=ppc64el
-      install: *prepare_qemu
-      script: *test_arch
       # You can run non-important job only for cron mode
       # or any specific environment variable (ex: CI_CRON: 1) is set.
       if: type = cron OR env(CI_CRON) = 1
+install:
+  - "echo BUILD_TYPE=${BUILD_TYPE} ARCH=${ARCH}"
+  # Prepare QEMU.
+  # https://github.com/multiarch/qemu-user-static
+  # https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
+  - |
+    if [[ "${BUILD_TYPE}" =~ ^arch ]]; then
+      docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    fi
+  # Build container image.
+  - |
+    if [ "${BUILD_TYPE}" = "arch" ]; then
+      docker build --rm -t sample -f Dockerfile-${ARCH} .
+    fi
 before_script:
   # Show environment.
   - uname -a
   - id
   - pwd
 script:
-  - ./sample_test.sh
+  - |
+    if [ "${BUILD_TYPE}" = "arch" ]; then
+      docker run --rm -t sample ./sample_test.sh
+    fi
+  - |
+    if [ "${BUILD_TYPE}" = "arch-simple" ]; then
+      docker run --rm -t multiarch/ubuntu-debootstrap:${ARCH}-bionic uname -a
+    fi
+  - |
+    if [ "${BUILD_TYPE}" = "" ]; then
+      ./sample_test.sh
+    fi
+branches:
+  only:
+    - master
