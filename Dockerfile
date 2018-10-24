@@ -1,4 +1,3 @@
-# https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
 FROM multiarch/ubuntu-debootstrap:arm64-bionic
 
 # Test with non-root user.

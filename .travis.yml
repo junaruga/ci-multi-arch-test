@@ -2,14 +2,18 @@ language: generic
 dist: trusty
 services: docker
 sudo: false
+os: linux
 matrix:
   include:
     - name: x86_64-linux
     - name: aarch64-linux
       sudo: required
       env:
-        - BUILD_TYPE="arch"
         - ARCH=arm64
+    - name: armv7l-linux
+      sudo: required
+      env:
+        - ARCH=armhf
     - name: i386-linux-simple
       sudo: required
       env:
@@ -39,13 +43,16 @@ install:
   # https://github.com/multiarch/qemu-user-static
   # https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
   - |
-    if [[ "${BUILD_TYPE}" =~ ^arch ]]; then
+    if [ "${ARCH}" != "" ]; then
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
     fi
   # Build container image.
   - |
-    if [ "${BUILD_TYPE}" = "arch" ]; then
-      docker build --rm -t sample -f Dockerfile-${ARCH} .
+    if [ "${ARCH}" != "" ]; then
+      if [ "${BUILD_TYPE}" = "" ]; then
+        sed -i "/^FROM / s/arm64/${ARCH}/" Dockerfile && \
+          docker build --rm -t sample .
+      fi
     fi
 before_script:
   # Show environment.
@@ -54,15 +61,19 @@ before_script:
   - pwd
 script:
   - |
-    if [ "${BUILD_TYPE}" = "arch" ]; then
-      docker run --rm -t sample ./sample_test.sh
+    if [ "${ARCH}" != "" ]; then
+      if [ "${BUILD_TYPE}" = "" ]; then
+        docker run --rm -t sample ./sample_test.sh
+      fi
     fi
   - |
-    if [ "${BUILD_TYPE}" = "arch-simple" ]; then
-      docker run --rm -t multiarch/ubuntu-debootstrap:${ARCH}-bionic uname -a
+    if [ "${ARCH}" != "" ]; then
+      if [ "${BUILD_TYPE}" = "arch-simple" ]; then
+        docker run --rm -t multiarch/ubuntu-debootstrap:${ARCH}-bionic uname -a
+      fi
     fi
   - |
-    if [ "${BUILD_TYPE}" = "" ]; then
+    if [ "${ARCH}" = "" ]; then
       ./sample_test.sh
     fi
 branches:
