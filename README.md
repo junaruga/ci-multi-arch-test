@@ -5,7 +5,7 @@
 
 ## Travis CI
 
-Using QEMU and Docker container.
+Using QEMU and Docker container. [1][2]
 
 ```
 $ docker run --rm --privileged multiarch/qemu-user-static:register --reset
@@ -22,3 +22,8 @@ Linux 4de7b4e919b0 4.4.0-101-generic #124~14.04.1-Ubuntu SMP Fri Nov 10 19:05:36
 Node pools available for free.
 
 ![alt text](resources/shippable_node_pools.png "Shippable node pools")
+
+## References
+
+* [1] https://github.com/multiarch/qemu-user-static
+* [2] https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
