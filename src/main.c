@@ -20,6 +20,7 @@ bool is_little_endian()
 {
     bool is_little = false;
     int n = 1;
+
     /* if true, little endian */
     if (*(char *)&n == 1) {
         is_little = true;
@@ -34,12 +35,12 @@ bool is_little_endian()
 bool get_bit_num(int *bit_num)
 {
     bool status = true;
-    switch (sizeof(void*)) {
+    int p_size = sizeof(void*);
+
+    switch (p_size) {
     case 4:
-        *bit_num = 4 * 8;
-        break;
     case 8:
-        *bit_num = 8 * 8;
+        *bit_num = p_size * 8;
         break;
     default:
         status = false;
