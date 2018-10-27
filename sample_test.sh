@@ -5,6 +5,8 @@ set -ev
 # Show environment
 uname -a
 id
-# Build and test logic
-echo "build logic."
-echo "test logic."
+gcc --version
+# Build logic.
+make
+bin/arch-test
+# Test logic.

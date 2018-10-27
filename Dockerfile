@@ -7,6 +7,9 @@ ENV WORK_DIR "/build"
 RUN uname -a
 RUN apt-get update -qq && \
   apt-get install -yq --no-install-suggests --no-install-recommends \
+  build-essential \
+  gcc \
+  make \
   git \
   sudo
 
