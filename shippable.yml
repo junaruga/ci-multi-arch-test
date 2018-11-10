@@ -7,6 +7,20 @@ matrix:
       env: ARCH="aarch32"
     - nodePool: default_node_pool
       env: ARCH="x86_64"
+    - nodePool: shippable_shared_aarch64
+      language: python
+      python: 3.6
+      env: ARCH="aarch64"
+      build:
+        pre_ci:
+          - python --version
+    - nodePool: shippable_shared_aarch64
+      language: ruby
+      rvm: 2.5
+      env: ARCH="aarch64"
+      build:
+        pre_ci:
+          - ruby --version
 build:
   ci:
     # Show environment.
