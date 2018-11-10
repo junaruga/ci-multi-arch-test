@@ -14,9 +14,10 @@ int main(void)
     printf("Bit: %d Bit\n", bit_num);
     /* Sizeof */
     printf("Sizeof {int, long, long long, void*, size_t, off_t}: "
-        "{%lu, %lu, %lu, %lu, %lu, %lu}\n",
-        sizeof(int), sizeof(long), sizeof(long long),
-        sizeof(void *), sizeof(size_t), sizeof(off_t));
+        "{%u, %u, %u, %u, %u, %u}\n",
+        (unsigned int) sizeof(int), (unsigned int) sizeof(long),
+        (unsigned int) sizeof(long long), (unsigned int) sizeof(void *),
+        (unsigned int) sizeof(size_t), (unsigned int) sizeof(off_t));
     /* ARCH */
     return 0;
 }
