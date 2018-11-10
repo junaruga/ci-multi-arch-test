@@ -1,5 +1,5 @@
+dist: xenial
 language: generic
-dist: trusty
 services: docker
 sudo: false
 os: linux
