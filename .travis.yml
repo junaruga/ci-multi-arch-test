@@ -6,6 +6,10 @@ os: linux
 matrix:
   include:
     - name: x86_64-linux
+    - name: i386-linux
+      sudo: required
+      env:
+        - ARCH=i386
     - name: aarch64-linux
       sudo: required
       env:
@@ -14,11 +18,8 @@ matrix:
       sudo: required
       env:
         - ARCH=armhf
-    - name: i386-linux-simple
-      sudo: required
-      env:
-        - BUILD_TYPE="arch-simple"
-        - ARCH=i386
+    - name: ppc64le-linux
+      os: linux-ppc64le
     - name: aarch64-linux-simple
       sudo: required
       env:
@@ -29,11 +30,6 @@ matrix:
       env:
         - BUILD_TYPE="arch-simple"
         - ARCH=armhf
-    - name: ppc64le-linux-simple
-      sudo: required
-      env:
-        - BUILD_TYPE="arch-simple"
-        - ARCH=ppc64el
       # You can run non-important job only for cron mode
       # or any specific environment variable (ex: CI_CRON: 1) is set.
       if: type = cron OR env(CI_CRON) = 1
