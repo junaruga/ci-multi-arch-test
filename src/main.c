@@ -12,6 +12,12 @@ int main(void)
     /* 64-bit or 32-bit */
     get_bit_num(&bit_num);
     printf("Bit: %d Bit\n", bit_num);
+    /* Sizeof */
+    printf("Sizeof {int, long, long long, void*, size_t, off_t}: "
+        "{%u, %u, %u, %u, %u, %u}\n",
+        (unsigned int) sizeof(int), (unsigned int) sizeof(long),
+        (unsigned int) sizeof(long long), (unsigned int) sizeof(void *),
+        (unsigned int) sizeof(size_t), (unsigned int) sizeof(off_t));
     /* ARCH */
     return 0;
 }
