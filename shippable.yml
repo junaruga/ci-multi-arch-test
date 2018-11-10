@@ -1,13 +1,18 @@
-runtime:
-  - nodePool: shippable_shared_aarch64
-  - nodePool: shippable_shared_aarch32
-  - nodePool: default_node_pool
 language: none
+matrix:
+  include:
+    - nodePool: shippable_shared_aarch64
+      env: ARCH="aarch64"
+    - nodePool: shippable_shared_aarch32
+      env: ARCH="aarch32"
+    - nodePool: default_node_pool
+      env: ARCH="x86_64"
 build:
   ci:
     # Show environment.
     - uname -a
     - id
     - pwd
+    - echo "ARCH=$ARCH"
     # Test.
     - ./sample_test.sh
