@@ -5,21 +5,27 @@ sudo: false
 os: linux
 matrix:
   include:
+    # Intel, 64-bit, Little-endian
     - name: x86_64-linux
+    # Intel, 32-bit, Little-endian
     - name: i386-linux
       sudo: required
       env:
         - ARCH=i386
+    # ARM, 64-bit, Little-endian
     - name: aarch64-linux
       sudo: required
       env:
         - ARCH=arm64
+    # ARM, 32-bit, Little-endian
     - name: armv7l-linux
       sudo: required
       env:
         - ARCH=armhf
+    # PowerPC, 64-bit, Little-endian
     - name: ppc64le-linux
       os: linux-ppc64le
+    # IBM Z and LinuxONE, 64-bit, Big-endian
     - name: s390x-linux
       sudo: required
       env:

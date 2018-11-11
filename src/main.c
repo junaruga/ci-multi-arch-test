@@ -8,10 +8,10 @@ int main(void)
 
     printf("Hello World!\n");
     /* Little or Big Endian */
-    printf("Endian Type: %s Endian\n", (is_little_endian()) ? "Little" : "Big");
+    printf("Endian Type: %s-endian\n", (is_little_endian()) ? "Little" : "Big");
     /* 64-bit or 32-bit */
     get_bit_num(&bit_num);
-    printf("Bit: %d Bit\n", bit_num);
+    printf("Bit: %d-bit\n", bit_num);
     /* Sizeof */
     printf("Sizeof {int, long, long long, void*, size_t, off_t}: "
         "{%u, %u, %u, %u, %u, %u}\n",
