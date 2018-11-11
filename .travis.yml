@@ -1,4 +1,4 @@
-dist: xenial
+dist: trusty
 language: generic
 services: docker
 sudo: false
@@ -20,21 +20,26 @@ matrix:
         - ARCH=armhf
     - name: ppc64le-linux
       os: linux-ppc64le
-    - name: aarch64-linux-simple
+    - name: s390x-linux
+      sudo: required
+      env:
+        - OS_NAME=debian
+        - OS_VERSION=jessie
+        - ARCH=s390x
+    - name: s390x-linux-simple
       sudo: required
       env:
         - BUILD_TYPE="arch-simple"
-        - ARCH=arm64
-    - name: armv7l-linux-simple
-      sudo: required
-      env:
-        - BUILD_TYPE="arch-simple"
-        - ARCH=armhf
+        - OS_NAME=debian
+        - OS_VERSION=jessie
+        - ARCH=s390x
       # You can run non-important job only for cron mode
       # or any specific environment variable (ex: CI_CRON: 1) is set.
       if: type = cron OR env(CI_CRON) = 1
 install:
-  - "echo BUILD_TYPE=${BUILD_TYPE} ARCH=${ARCH}"
+  - "OS_NAME=${OS_NAME:-ubuntu}"
+  - "OS_VERSION=${OS_VERSION:-bionic}"
+  - "echo OS_NAME=${OS_NAME} OS_VERSION=${OS_VERSION} ARCH=${ARCH} BUILD_TYPE=${BUILD_TYPE}"
   # Prepare QEMU.
   # https://github.com/multiarch/qemu-user-static
   # https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
@@ -46,6 +51,8 @@ install:
   - |
     if [ "${ARCH}" != "" ]; then
       if [ "${BUILD_TYPE}" = "" ]; then
+        sed -i "/^FROM / s/ubuntu/${OS_NAME}/" Dockerfile && \
+        sed -i "/^FROM / s/bionic/${OS_VERSION}/" Dockerfile && \
         sed -i "/^FROM / s/arm64/${ARCH}/" Dockerfile && \
           docker build --rm -t sample .
       fi
@@ -65,7 +72,7 @@ script:
   - |
     if [ "${ARCH}" != "" ]; then
       if [ "${BUILD_TYPE}" = "arch-simple" ]; then
-        docker run --rm -t multiarch/ubuntu-debootstrap:${ARCH}-bionic uname -a
+        docker run --rm -t multiarch/${OS_NAME}-debootstrap:${ARCH}-${OS_VERSION} uname -a
       fi
     fi
   - |
