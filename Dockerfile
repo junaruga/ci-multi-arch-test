@@ -1,4 +1,9 @@
-FROM multiarch/ubuntu-debootstrap:arm64-bionic
+# Docker >= 17.05.0-ce allows using build-time args (ARG) in FROM (#31352).
+# https://github.com/moby/moby/releases/tag/v17.05.0-ce
+ARG OS_NAME=ubuntu
+ARG OS_VERSION=bionic
+ARG ARCH=arm64
+FROM multiarch/${OS_NAME}-debootstrap:${ARCH}-${OS_VERSION}
 
 # Test with non-root user.
 ENV TEST_USER test
