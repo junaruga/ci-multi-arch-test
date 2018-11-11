@@ -51,10 +51,11 @@ install:
   - |
     if [ "${ARCH}" != "" ]; then
       if [ "${BUILD_TYPE}" = "" ]; then
-        sed -i "/^FROM / s/ubuntu/${OS_NAME}/" Dockerfile && \
-        sed -i "/^FROM / s/bionic/${OS_VERSION}/" Dockerfile && \
-        sed -i "/^FROM / s/arm64/${ARCH}/" Dockerfile && \
-          docker build --rm -t sample .
+        docker build --rm -t sample \
+          --build-arg OS_NAME=${OS_NAME} \
+          --build-arg OS_VERSION=${OS_VERSION} \
+          --build-arg ARCH=${ARCH} \
+          .
       fi
     fi
 before_script:
