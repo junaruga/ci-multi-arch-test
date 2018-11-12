@@ -1,0 +1,33 @@
+# Docker >= 17.05.0-ce allows using build-time args (ARG) in FROM (#31352).
+# https://github.com/moby/moby/releases/tag/v17.05.0-ce
+ARG OS_NAME=centos
+ARG OS_VERSION=7
+ARG ARCH=aarch64
+FROM multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}-iso
+
+# Test with non-root user.
+ENV TEST_USER test
+ENV WORK_DIR "/build"
+
+RUN uname -a
+RUN yum -y update
+RUN yum -y install epel-release
+RUN yum -y install \
+  --setopt=deltarpm=0 \
+  --setopt=install_weak_deps=false \
+  --setopt=tsflags=nodocs \
+  gcc \
+  git \
+  make \
+  redhat-rpm-config \
+  sudo
+# Create test user and the environment
+RUN useradd "${TEST_USER}"
+WORKDIR "${WORK_DIR}"
+COPY . .
+RUN chown -R "${TEST_USER}:${TEST_USER}" "${WORK_DIR}"
+
+# Enable sudo without password for convenience.
+RUN echo "${TEST_USER} ALL = NOPASSWD: ALL" >> /etc/sudoers
+
+USER "${TEST_USER}"
