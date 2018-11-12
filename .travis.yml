@@ -111,7 +111,7 @@ before_install:
 install:
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
   - |
-    docker build --rm -t sample \
+    travis_retry docker build --rm -t sample \
       --build-arg OS_NAME=${OS_NAME} \
       --build-arg OS_VERSION=${OS_VERSION} \
       --build-arg ARCH=${ARCH} \
