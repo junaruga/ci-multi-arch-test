@@ -42,13 +42,47 @@ matrix:
       # You can run non-important job only for cron mode
       # or any specific environment variable (ex: CI_CRON: 1) is set.
       if: type = cron OR env(CI_CRON) = 1
+    # ARM, 64-bit, Little-endian
+    - name: centos-aarch64-linux-simple
+      sudo: required
+      env:
+        - BUILD_TYPE="arch-simple"
+        - OS_NAME=centos
+        - OS_VERSION=7
+        - ARCH=aarch64
+    # PowerPC, 64-bit, Big-endian
+    - name: centos-ppc64-linux-simple
+      sudo: required
+      env:
+        - BUILD_TYPE="arch-simple"
+        - OS_NAME=centos
+        - OS_VERSION=7
+        - ARCH=ppc64
+    # ARM, 64-bit, Little-endian
+    - name: fedora-aarch64-linux-simple
+      sudo: required
+      env:
+        - BUILD_TYPE="arch-simple"
+        - OS_NAME=fedora
+        - OS_VERSION=25
+        - ARCH=aarch64
+    # PowerPC, 64-bit, Big-endian
+    - name: fedora-ppc64-linux-simple
+      sudo: required
+      env:
+        - BUILD_TYPE="arch-simple"
+        - OS_NAME=fedora
+        - OS_VERSION=25
+        - ARCH=ppc64
+  allow_failures:
+    - name: centos-ppc64-linux-simple
+  fast_finish: true
 install:
   - "OS_NAME=${OS_NAME:-ubuntu}"
   - "OS_VERSION=${OS_VERSION:-bionic}"
   - "echo OS_NAME=${OS_NAME} OS_VERSION=${OS_VERSION} ARCH=${ARCH} BUILD_TYPE=${BUILD_TYPE}"
   # Prepare QEMU.
   # https://github.com/multiarch/qemu-user-static
-  # https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
   - |
     if [ "${ARCH}" != "" ]; then
       docker run --rm --privileged multiarch/qemu-user-static:register --reset
@@ -79,7 +113,15 @@ script:
   - |
     if [ "${ARCH}" != "" ]; then
       if [ "${BUILD_TYPE}" = "arch-simple" ]; then
-        docker run --rm -t multiarch/${OS_NAME}-debootstrap:${ARCH}-${OS_VERSION} uname -a
+        IMAGE=""
+        if [ "${OS_NAME}" = "ubuntu" -o "${OS_NAME}" = "debian" ]; then
+          IMAGE="multiarch/${OS_NAME}-debootstrap:${ARCH}-${OS_VERSION}"
+        elif [ "${OS_NAME}" = "centos" ]; then
+          IMAGE="multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}-iso"
+        elif [ "${OS_NAME}" = "fedora" ]; then
+          IMAGE="multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}"
+        fi
+        docker run --rm -t "${IMAGE}" uname -a
       fi
     fi
   - |
