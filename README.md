@@ -31,3 +31,5 @@ Node pools available for free.
 * [1] multiarch: https://github.com/multiarch/qemu-user-static
 * [2] multiarch Ubuntu: https://hub.docker.com/r/multiarch/ubuntu-debootstrap/tags/
 * [3] multiarch Debian: https://hub.docker.com/r/multiarch/debian-debootstrap/tags/
+* [4] multiarch CentOS: https://hub.docker.com/r/multiarch/centos/tags/
+* [5] multiarch Fedora: https://hub.docker.com/r/multiarch/fedora/tags/
