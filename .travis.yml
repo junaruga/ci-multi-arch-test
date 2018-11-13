@@ -134,7 +134,7 @@ before_install:
   - pwd
   - "OS_NAME=${OS_NAME:-ubuntu}"
   - "OS_VERSION=${OS_VERSION:-bionic}"
-  - "echo OS_NAME=${OS_NAME} OS_VERSION=${OS_VERSION} ARCH=${ARCH} BUILD_TYPE=${BUILD_TYPE}"
+  - "echo OS_NAME=${OS_NAME} OS_VERSION=${OS_VERSION} ARCH=${ARCH}"
 install:
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
   - |
