@@ -1,26 +1,17 @@
-dist: trusty
-language: generic
+dist: xenial
+language: bash
 services: docker
-sudo: false
 os: linux
 
 .com.github.junaruga.ci-multi-arch-test.matrix-definitions:
   - &test_arch_simple
     install:
-      - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - ls /proc/sys/fs/binfmt_misc/
+      - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - ls /proc/sys/fs/binfmt_misc/
     script:
-      - |
-        IMAGE=""
-        if [ "${OS_NAME}" = "ubuntu" -o "${OS_NAME}" = "debian" ]; then
-          IMAGE="multiarch/${OS_NAME}-debootstrap:${ARCH}-${OS_VERSION}"
-        elif [ "${OS_NAME}" = "centos" ]; then
-          IMAGE="multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}-iso"
-        elif [ "${OS_NAME}" = "fedora" ]; then
-          IMAGE="multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}"
-        fi
-      - "echo IMAGE: ${IMAGE}"
-      - |
-        docker run --rm -t "${IMAGE}" uname -a
+      - "echo BASE_IMAGE: ${BASE_IMAGE}"
+      - docker run --rm -t "${BASE_IMAGE}" uname -a
   - &test_no_arch
     install: true
     script: ./sample_test.sh
@@ -32,100 +23,73 @@ matrix:
       <<: *test_no_arch
     # Intel, 32-bit, Little-endian
     - name: i386-linux
-      sudo: required
       env:
-        - ARCH=i386
+        - BASE_IMAGE=i386/ubuntu
     # ARM, 64-bit, Little-endian
     - name: aarch64-linux
-      sudo: required
       env:
-        - ARCH=arm64
+        - BASE_IMAGE=arm64v8/ubuntu
     # ARM, 32-bit, Little-endian
-    - name: armv7l-linux
-      sudo: required
+    - name: arm32-linux
       env:
-        - ARCH=armhf
+        - BASE_IMAGE=arm32v7/ubuntu
     # PowerPC, 64-bit, Little-endian
     - name: ppc64le-linux
       os: linux-ppc64le
       <<: *test_no_arch
     # IBM Z and LinuxONE, 64-bit, Big-endian
     - name: s390x-linux
-      sudo: required
       env:
-        - OS_NAME=debian
-        - OS_VERSION=jessie
-        - ARCH=s390x
+        - BASE_IMAGE=s390x/ubuntu
     - name: s390x-linux-simple
-      sudo: required
       env:
+        - BASE_IMAGE=s390x/debian
         - OS_NAME=debian
-        - OS_VERSION=jessie
-        - ARCH=s390x
       <<: *test_arch_simple
       # You can run non-important job only for cron mode
       # or any specific environment variable (ex: CI_CRON: 1) is set.
       if: type = cron OR env(CI_CRON) = 1
     # ARM, 64-bit, Little-endian
     - name: centos-aarch64-linux
-      sudo: required
       env:
+        - BASE_IMAGE=arm64v8/centos
         - OS_NAME=centos
-        - OS_VERSION=7
-        - ARCH=aarch64
     - name: centos-aarch64-linux-simple
-      sudo: required
       env:
+        - BASE_IMAGE=arm64v8/centos
         - OS_NAME=centos
-        - OS_VERSION=7
-        - ARCH=aarch64
       <<: *test_arch_simple
-    # PowerPC, 64-bit, Big-endian
-    - name: centos-ppc64-linux
-      sudo: required
+    # PowerPC, 64-bit, Little-endian
+    - name: centos-ppc64le-linux
       env:
+        - BASE_IMAGE=ppc64le/centos
         - OS_NAME=centos
-        - OS_VERSION=7
-        - ARCH=ppc64
-    - name: centos-ppc64-linux-simple
-      sudo: required
+    - name: centos-ppc64le-linux-simple
       env:
+        - BASE_IMAGE=ppc64le/centos
         - OS_NAME=centos
-        - OS_VERSION=7
-        - ARCH=ppc64
       <<: *test_arch_simple
     # ARM, 64-bit, Little-endian
     - name: fedora-aarch64-linux
-      sudo: required
       env:
+        - BASE_IMAGE=arm64v8/fedora
         - OS_NAME=fedora
-        - OS_VERSION=25
-        - ARCH=aarch64
     - name: fedora-aarch64-linux-simple
-      sudo: required
       env:
+        - BASE_IMAGE=arm64v8/fedora
         - OS_NAME=fedora
-        - OS_VERSION=25
-        - ARCH=aarch64
       <<: *test_arch_simple
     # PowerPC, 64-bit, Big-endian
-    - name: fedora-ppc64-linux
-      sudo: required
+    - name: fedora-s390x-linux
       env:
+        - BASE_IMAGE=s390x/fedora
         - OS_NAME=fedora
-        - OS_VERSION=25
-        - ARCH=ppc64
-    - name: fedora-ppc64-linux-simple
-      sudo: required
+    - name: fedora-s390x-linux-simple
       env:
+        - BASE_IMAGE=s390x/fedora
         - OS_NAME=fedora
-        - OS_VERSION=25
-        - ARCH=ppc64
       <<: *test_arch_simple
   allow_failures:
-    - name: centos-ppc64-linux
-    - name: centos-ppc64-linux-simple
-    - name: fedora-ppc64-linux
   fast_finish: true
 before_install:
   # Show environment.
@@ -133,15 +97,14 @@ before_install:
   - id
   - pwd
   - "OS_NAME=${OS_NAME:-ubuntu}"
-  - "OS_VERSION=${OS_VERSION:-bionic}"
-  - "echo OS_NAME=${OS_NAME} OS_VERSION=${OS_VERSION} ARCH=${ARCH}"
+  - "BASE_IMAGE=${BASE_IMAGE:ubuntu}"
 install:
-  - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+  - ls /proc/sys/fs/binfmt_misc/
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - ls /proc/sys/fs/binfmt_misc/
   - |
     travis_retry docker build --rm -t sample \
-      --build-arg OS_NAME=${OS_NAME} \
-      --build-arg OS_VERSION=${OS_VERSION} \
-      --build-arg ARCH=${ARCH} \
+      --build-arg BASE_IMAGE=${BASE_IMAGE} \
       -f Dockerfile-${OS_NAME} \
       .
 script:

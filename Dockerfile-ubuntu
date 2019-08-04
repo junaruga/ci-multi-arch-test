@@ -1,9 +1,7 @@
 # Docker >= 17.05.0-ce allows using build-time args (ARG) in FROM (#31352).
 # https://github.com/moby/moby/releases/tag/v17.05.0-ce
-ARG OS_NAME=ubuntu
-ARG OS_VERSION=bionic
-ARG ARCH=arm64
-FROM multiarch/${OS_NAME}-debootstrap:${ARCH}-${OS_VERSION}
+ARG BASE_IMAGE=ubuntu
+FROM ${BASE_IMAGE}
 
 # Test with non-root user.
 ENV TEST_USER test
@@ -13,6 +11,7 @@ RUN uname -a
 RUN apt-get update -qq && \
   apt-get install -yq --no-install-suggests --no-install-recommends \
   build-essential \
+  file \
   gcc \
   make \
   git \

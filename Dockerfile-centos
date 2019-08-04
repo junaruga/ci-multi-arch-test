@@ -1,9 +1,7 @@
 # Docker >= 17.05.0-ce allows using build-time args (ARG) in FROM (#31352).
 # https://github.com/moby/moby/releases/tag/v17.05.0-ce
-ARG OS_NAME=centos
-ARG OS_VERSION=7
-ARG ARCH=aarch64
-FROM multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}-iso
+ARG BASE_IMAGE=centos
+FROM ${BASE_IMAGE}
 
 # Test with non-root user.
 ENV TEST_USER test
@@ -16,6 +14,7 @@ RUN yum -y install \
   --setopt=deltarpm=0 \
   --setopt=install_weak_deps=false \
   --setopt=tsflags=nodocs \
+  file \
   gcc \
   git \
   make \

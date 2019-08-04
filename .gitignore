@@ -1,4 +1,4 @@
 *.o
 *.swp
 *~
-bin/arch-test
+bin/hello

@@ -1,9 +1,7 @@
 # Docker >= 17.05.0-ce allows using build-time args (ARG) in FROM (#31352).
 # https://github.com/moby/moby/releases/tag/v17.05.0-ce
-ARG OS_NAME=fedora
-ARG OS_VERSION=25
-ARG ARCH=aarch64
-FROM multiarch/${OS_NAME}:${OS_VERSION}-${ARCH}
+ARG BASE_IMAGE=fedora
+FROM ${BASE_IMAGE}
 
 # Test with non-root user.
 ENV TEST_USER test
@@ -13,6 +11,7 @@ RUN uname -a
 RUN echo -e "deltarpm=0\ninstall_weak_deps=0\ntsflags=nodocs" >> /etc/dnf/dnf.conf
 RUN dnf -y update
 RUN dnf -y --allowerasing install \
+  file \
   gcc \
   git \
   make \

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ev
+set -ex
 
 # Show environment
 uname -a
@@ -8,5 +8,5 @@ id
 gcc --version
 # Build logic.
 make
-bin/arch-test
 # Test logic.
+make test
