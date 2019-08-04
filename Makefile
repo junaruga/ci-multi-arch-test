@@ -1,7 +1,14 @@
+TARGET = bin/hello
+
 all :
-	gcc -o bin/arch-test src/main.c
+	gcc -o $(TARGET) src/main.c
 .PHONY : all
 
 clean :
-	rm -rf src/*.o bin/arch-test
+	rm -rf src/*.o $(TARGET)
 .PHONY : clean
+
+test : all
+	file $(TARGET)
+	$(TARGET)
+.PHONY : test
