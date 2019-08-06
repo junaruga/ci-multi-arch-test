@@ -49,47 +49,36 @@ matrix:
       # You can run non-important job only for cron mode
       # or any specific environment variable (ex: CI_CRON: 1) is set.
       if: type = cron OR env(CI_CRON) = 1
+
+    # Intel, 32-bit, Little-endian
+    - name: centos-i386-linux
+      env:
+        - BASE_IMAGE=i386/centos
+        - OS_NAME=centos
     # ARM, 64-bit, Little-endian
     - name: centos-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/centos
         - OS_NAME=centos
-    - name: centos-aarch64-linux-simple
-      env:
-        - BASE_IMAGE=arm64v8/centos
-        - OS_NAME=centos
-      <<: *test_arch_simple
     # PowerPC, 64-bit, Little-endian
     - name: centos-ppc64le-linux
       env:
         - BASE_IMAGE=ppc64le/centos
         - OS_NAME=centos
-    - name: centos-ppc64le-linux-simple
-      env:
-        - BASE_IMAGE=ppc64le/centos
-        - OS_NAME=centos
-      <<: *test_arch_simple
     # ARM, 64-bit, Little-endian
     - name: fedora-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/fedora
         - OS_NAME=fedora
-    - name: fedora-aarch64-linux-simple
-      env:
-        - BASE_IMAGE=arm64v8/fedora
-        - OS_NAME=fedora
-      <<: *test_arch_simple
     # PowerPC, 64-bit, Big-endian
     - name: fedora-s390x-linux
       env:
         - BASE_IMAGE=s390x/fedora
         - OS_NAME=fedora
-    - name: fedora-s390x-linux-simple
-      env:
-        - BASE_IMAGE=s390x/fedora
-        - OS_NAME=fedora
-      <<: *test_arch_simple
   allow_failures:
+    # No package epel-release available.
+    # https://travis-ci.org/junaruga/ci-multi-arch-test/jobs/568490418
+    - name: centos-i386-linux
   fast_finish: true
 before_install:
   # Show environment.
