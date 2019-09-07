@@ -11,6 +11,8 @@ os: linux
 
 # Definitions using YAML's anchor (&) and reference (*).
 .com.github.junaruga.ci-multi-arch-test.matrix-definitions:
+  # Current recommended way.
+  # But it might be slower than below deprecated way.
   - &test_in_container
     # language: bash or generic is good to run container.
     language: bash
@@ -25,6 +27,7 @@ os: linux
           .
     script:
       - docker run --rm -t sample ./sample_test.sh
+  # A case to check "uname" without building a container.
   - &test_simple_in_container
     language: bash
     install:
@@ -34,6 +37,8 @@ os: linux
     script:
       - "echo BASE_IMAGE: ${BASE_IMAGE}"
       - docker run --rm -t "${BASE_IMAGE}" uname -a
+  # Current deprecated way.
+  # But it can be faster than above recommended way.
   - &test_in_container_with_register
     language: bash
     install:
@@ -51,7 +56,7 @@ os: linux
 matrix:
   include:
     # Intel, 64-bit, Little-endian
-    - name: ubuntu-x86_64-linux
+    - name: ubuntu-x86_64-linux-native
     # Intel, 32-bit, Little-endian
     - name: ubuntu-i386-linux
       # A container job with QEMU takes more running time (2 ~ 4 times).
@@ -183,7 +188,7 @@ before_install:
   - id
   - pwd
   - "OS_NAME=${OS_NAME:-ubuntu}"
-  - "BASE_IMAGE=${BASE_IMAGE:ubuntu}"
+  - echo OS_NAME=${OS_NAME} BASE_IMAGE=${BASE_IMAGE}
 # Logic without container and QEMU.
 # This means your current logic.
 install: true
