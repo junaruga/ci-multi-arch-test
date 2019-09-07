@@ -34,6 +34,19 @@ os: linux
     script:
       - "echo BASE_IMAGE: ${BASE_IMAGE}"
       - docker run --rm -t "${BASE_IMAGE}" uname -a
+  - &test_in_container_with_register
+    language: bash
+    install:
+      - ls /proc/sys/fs/binfmt_misc/
+      - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - ls /proc/sys/fs/binfmt_misc/
+      - |
+        travis_retry docker build --rm -t sample \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          -f Dockerfile-${OS_NAME} \
+          .
+    script:
+      - docker run --rm -t sample ./sample_test.sh
 
 matrix:
   include:
@@ -50,16 +63,28 @@ matrix:
       env:
         - BASE_IMAGE=i386/ubuntu
       <<: *test_in_container
+    - name: ubuntu-i386-linux-register
+      env:
+        - BASE_IMAGE=multiarch/ubuntu-debootstrap:i386-bionic
+      <<: *test_in_container_with_register
     # ARM, 64-bit, Little-endian
     - name: ubuntu-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/ubuntu
       <<: *test_in_container
+    - name: ubuntu-aarch64-linux-register
+      env:
+        - BASE_IMAGE=multiarch/ubuntu-debootstrap:arm64-bionic
+      <<: *test_in_container_with_register
     # ARM, 32-bit, Little-endian
     - name: ubuntu-arm32-linux
       env:
         - BASE_IMAGE=arm32v7/ubuntu
       <<: *test_in_container
+    - name: ubuntu-arm32-linux-register
+      env:
+        - BASE_IMAGE=multiarch/ubuntu-debootstrap:armhf-bionic
+      <<: *test_in_container_with_register
     # PowerPC, 64-bit, Little-endian
     - name: ubuntu-ppc64le-linux
       env:
@@ -76,6 +101,11 @@ matrix:
       env:
         - BASE_IMAGE=s390x/ubuntu
       <<: *test_simple_in_container
+    # PowerPC, 64-bit, Big-endian
+    - name: ubuntu-ppc64-linux-register
+      env:
+        - BASE_IMAGE=multiarch/ubuntu-debootstrap:powerpc-xenial
+      <<: *test_in_container_with_register
     # Intel, 32-bit, Little-endian
     - name: debian-i386-linux
       env:
