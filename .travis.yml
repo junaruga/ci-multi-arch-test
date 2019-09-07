@@ -1,10 +1,32 @@
+# dist: xenial is required to run "multiarch/qemu-user-static -p yes".
+# dist: trusty does not work for that.
+# I am not sure if the reason is the trusty's Linux kernel is old.
+# "multiarch/qemu-user-static" image uses Linux kernel feature binfmt_misc
+# in it.
 dist: xenial
-language: bash
+# This means your current language mode.
+language: c
 services: docker
 os: linux
 
+# Definitions using YAML's anchor (&) and reference (*).
 .com.github.junaruga.ci-multi-arch-test.matrix-definitions:
-  - &test_arch_simple
+  - &test_in_container
+    # language: bash or generic is good to run container.
+    language: bash
+    install:
+      - ls /proc/sys/fs/binfmt_misc/
+      - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - ls /proc/sys/fs/binfmt_misc/
+      - |
+        travis_retry docker build --rm -t sample \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          -f Dockerfile-${OS_NAME} \
+          .
+    script:
+      - docker run --rm -t sample ./sample_test.sh
+  - &test_simple_in_container
+    language: bash
     install:
       - ls /proc/sys/fs/binfmt_misc/
       - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
@@ -12,69 +34,114 @@ os: linux
     script:
       - "echo BASE_IMAGE: ${BASE_IMAGE}"
       - docker run --rm -t "${BASE_IMAGE}" uname -a
-  - &test_no_arch
-    install: true
-    script: ./sample_test.sh
 
 matrix:
   include:
     # Intel, 64-bit, Little-endian
-    - name: x86_64-linux
-      <<: *test_no_arch
+    - name: ubuntu-x86_64-linux
     # Intel, 32-bit, Little-endian
-    - name: i386-linux
+    - name: ubuntu-i386-linux
+      # A container job with QEMU takes more running time (2 ~ 4 times).
+      # You can run non-important job only for cron mode
+      # or any specific environment variable (ex: CI_CRON: 1) is set,
+      # avoiding to run it at pull-request timing.
+      # if: type = cron or CI_CRON = 1
+      # if: type = cron
       env:
         - BASE_IMAGE=i386/ubuntu
+      <<: *test_in_container
     # ARM, 64-bit, Little-endian
-    - name: aarch64-linux
+    - name: ubuntu-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/ubuntu
+      <<: *test_in_container
     # ARM, 32-bit, Little-endian
-    - name: arm32-linux
+    - name: ubuntu-arm32-linux
       env:
         - BASE_IMAGE=arm32v7/ubuntu
+      <<: *test_in_container
     # PowerPC, 64-bit, Little-endian
-    - name: ppc64le-linux
+    - name: ubuntu-ppc64le-linux
+      env:
+        - BASE_IMAGE=ppc64le/ubuntu
+      <<: *test_in_container
+    - name: ubuntu-ppc64le-linux-native
       os: linux-ppc64le
-      <<: *test_no_arch
     # IBM Z and LinuxONE, 64-bit, Big-endian
-    - name: s390x-linux
+    - name: ubuntu-s390x-linux
       env:
         - BASE_IMAGE=s390x/ubuntu
-    - name: s390x-linux-simple
+      <<: *test_in_container
+    - name: ubuntu-s390x-linux-simple
+      env:
+        - BASE_IMAGE=s390x/ubuntu
+      <<: *test_simple_in_container
+    # Intel, 32-bit, Little-endian
+    - name: debian-i386-linux
+      env:
+        - BASE_IMAGE=i386/debian
+        - OS_NAME=debian
+      <<: *test_in_container
+    # ARM, 64-bit, Little-endian
+    - name: debian-aarch64-linux
+      env:
+        - BASE_IMAGE=arm64v8/debian
+        - OS_NAME=debian
+      <<: *test_in_container
+    # ARM, 32-bit, Little-endian
+    - name: debian-arm32-linux
+      env:
+        - BASE_IMAGE=arm32v7/debian
+        - OS_NAME=debian
+      <<: *test_in_container
+    # PowerPC, 64-bit, Little-endian
+    - name: debian-ppc64le-linux
+      env:
+        - BASE_IMAGE=ppc64le/debian
+        - OS_NAME=debian
+      <<: *test_in_container
+    # IBM Z and LinuxONE, 64-bit, Big-endian
+    - name: debian-s390x-linux
       env:
         - BASE_IMAGE=s390x/debian
         - OS_NAME=debian
-      <<: *test_arch_simple
-      # You can run non-important job only for cron mode
-      # or any specific environment variable (ex: CI_CRON: 1) is set.
-      if: type = cron OR env(CI_CRON) = 1
-
+      <<: *test_in_container
     # Intel, 32-bit, Little-endian
     - name: centos-i386-linux
       env:
         - BASE_IMAGE=i386/centos
         - OS_NAME=centos
+      <<: *test_in_container
     # ARM, 64-bit, Little-endian
     - name: centos-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/centos
         - OS_NAME=centos
+      <<: *test_in_container
     # PowerPC, 64-bit, Little-endian
     - name: centos-ppc64le-linux
       env:
         - BASE_IMAGE=ppc64le/centos
         - OS_NAME=centos
+      <<: *test_in_container
     # ARM, 64-bit, Little-endian
     - name: fedora-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/fedora
         - OS_NAME=fedora
+      <<: *test_in_container
+    # PowerPC, 64-bit, Little-endian
+    - name: fedora-ppc64le-linux
+      env:
+        - BASE_IMAGE=ppc64le/fedora
+        - OS_NAME=fedora
+      <<: *test_in_container
     # PowerPC, 64-bit, Big-endian
     - name: fedora-s390x-linux
       env:
         - BASE_IMAGE=s390x/fedora
         - OS_NAME=fedora
+      <<: *test_in_container
   allow_failures:
     # No package epel-release available.
     # https://travis-ci.org/junaruga/ci-multi-arch-test/jobs/568490418
@@ -87,17 +154,10 @@ before_install:
   - pwd
   - "OS_NAME=${OS_NAME:-ubuntu}"
   - "BASE_IMAGE=${BASE_IMAGE:ubuntu}"
-install:
-  - ls /proc/sys/fs/binfmt_misc/
-  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-  - ls /proc/sys/fs/binfmt_misc/
-  - |
-    travis_retry docker build --rm -t sample \
-      --build-arg BASE_IMAGE=${BASE_IMAGE} \
-      -f Dockerfile-${OS_NAME} \
-      .
-script:
-  - docker run --rm -t sample ./sample_test.sh
+# Logic without container and QEMU.
+# This means your current logic.
+install: true
+script: ./sample_test.sh
 branches:
   only:
     - master
