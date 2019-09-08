@@ -11,7 +11,7 @@ os: linux
 
 # Definitions using YAML's anchor (&) and reference (*).
 .com.github.junaruga.ci-multi-arch-test.matrix-definitions:
-  # Current recommended way.
+  # Recommended way 1
   # But it might be slower than below deprecated way.
   - &test_in_container
     # language: bash or generic is good to run container.
@@ -22,6 +22,21 @@ os: linux
       - ls /proc/sys/fs/binfmt_misc/
       - |
         travis_retry docker build --rm -t sample \
+          --build-arg BASE_IMAGE=${BASE_IMAGE} \
+          -f Dockerfile-${OS_NAME} \
+          .
+    script:
+      - docker run --rm -t sample ./sample_test.sh
+  # Recommended way 2
+  - &test_in_container_qemu_interpreter
+    language: bash
+    install:
+      - ls /proc/sys/fs/binfmt_misc/
+      - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+      - ls /proc/sys/fs/binfmt_misc/
+      - |
+        travis_retry docker build --rm -t sample \
+          --build-arg ARCH=${ARCH} \
           --build-arg BASE_IMAGE=${BASE_IMAGE} \
           -f Dockerfile-${OS_NAME} \
           .
@@ -77,6 +92,12 @@ matrix:
       env:
         - BASE_IMAGE=arm64v8/ubuntu
       <<: *test_in_container
+    - name: ubuntu-aarch64-linux-qemu-interpreter
+      env:
+        - ARCH=aarch64
+        - BASE_IMAGE=arm64v8/ubuntu
+        - OS_NAME=ubuntu-qemu
+      <<: *test_in_container_qemu_interpreter
     - name: ubuntu-aarch64-linux-register
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:arm64-bionic
@@ -86,6 +107,12 @@ matrix:
       env:
         - BASE_IMAGE=arm32v7/ubuntu
       <<: *test_in_container
+    - name: ubuntu-arm32-linux-qemu-interpreter
+      env:
+        - ARCH=arm
+        - BASE_IMAGE=arm32v7/ubuntu
+        - OS_NAME=ubuntu-qemu
+      <<: *test_in_container_qemu_interpreter
     - name: ubuntu-arm32-linux-register
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:armhf-bionic
@@ -106,6 +133,12 @@ matrix:
       env:
         - BASE_IMAGE=s390x/ubuntu
       <<: *test_simple_in_container
+    - name: ubuntu-s390x-linux-qemu-interpreter
+      env:
+        - ARCH=s390x
+        - BASE_IMAGE=s390x/ubuntu
+        - OS_NAME=ubuntu-qemu
+      <<: *test_in_container_qemu_interpreter
     # PowerPC, 64-bit, Big-endian
     - name: ubuntu-ppc64-linux-register
       env:
