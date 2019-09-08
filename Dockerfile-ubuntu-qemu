@@ -6,7 +6,7 @@ FROM multiarch/qemu-user-static:${ARCH} as qemu
 # https://github.com/moby/moby/releases/tag/v17.05.0-ce
 FROM ${BASE_IMAGE}
 
-ARG QEMU_INTERPRETER=qemu-aarch64-static
+ARG ARCH=aarch64
 
 # Test with non-root user.
 ENV TEST_USER test
@@ -14,7 +14,7 @@ ENV WORK_DIR "/build"
 
 # Put the qemu interpreter to run arch container with a binfmt_misc file
 # that does not have the persistent option (flags: F).
-COPY --from=qemu /usr/bin/${QEMU_INTERPRETER} /usr/bin
+COPY --from=qemu /usr/bin/qemu-${ARCH}-static /usr/bin
 
 RUN uname -a
 RUN apt-get update -qq && \
