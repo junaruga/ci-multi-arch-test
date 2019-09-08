@@ -36,7 +36,6 @@ os: linux
       - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - ls /proc/sys/fs/binfmt_misc/
     script:
-      - "echo BASE_IMAGE: ${BASE_IMAGE}"
       - docker run --rm -t "${BASE_IMAGE}" uname -a
   # Recommended way 2. This way does not use binfmt_misc persistent option.
   # It uses multiarch/qemu-user-static:$arch container in Dockerfile.
