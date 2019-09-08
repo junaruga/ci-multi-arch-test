@@ -9,8 +9,8 @@ FROM ${BASE_IMAGE}
 ARG ARCH=aarch64
 
 # Test with non-root user.
-ENV TEST_USER test
-ENV WORK_DIR "/build"
+ENV TEST_USER tester
+ENV WORK_DIR "/work"
 
 # Put the qemu interpreter to run arch container with a binfmt_misc file
 # that does not have the persistent option (flags: F).

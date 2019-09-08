@@ -4,8 +4,8 @@ ARG BASE_IMAGE=ubuntu
 FROM ${BASE_IMAGE}
 
 # Test with non-root user.
-ENV TEST_USER test
-ENV WORK_DIR "/build"
+ENV TEST_USER tester
+ENV WORK_DIR "/work"
 
 RUN uname -a
 RUN apt-get update -qq && \

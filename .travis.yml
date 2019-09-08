@@ -11,8 +11,9 @@ os: linux
 
 # Definitions using YAML's anchor (&) and reference (*).
 .com.github.junaruga.ci-multi-arch-test.matrix-definitions:
-  # Recommended way 1
-  # But it might be slower than below deprecated way.
+  # Recommended way 1. It's easy to implement.
+  # But the way using "-p yes" (binfmt_misc persistent option)
+  # might be slower than below alternative ways.
   - &test_in_container
     # language: bash or generic is good to run container.
     language: bash
@@ -27,7 +28,18 @@ os: linux
           .
     script:
       - docker run --rm -t sample ./sample_test.sh
-  # Recommended way 2
+  # A case to check only "uname"'s result without building a container.
+  - &test_simple_in_container
+    language: bash
+    install:
+      - ls /proc/sys/fs/binfmt_misc/
+      - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - ls /proc/sys/fs/binfmt_misc/
+    script:
+      - "echo BASE_IMAGE: ${BASE_IMAGE}"
+      - docker run --rm -t "${BASE_IMAGE}" uname -a
+  # Recommended way 2. This way does not use binfmt_misc persistent option.
+  # It uses multiarch/qemu-user-static:$arch container in Dockerfile.
   - &test_in_container_qemu_interpreter
     language: bash
     install:
@@ -42,19 +54,9 @@ os: linux
           .
     script:
       - docker run --rm -t sample ./sample_test.sh
-  # A case to check "uname" without building a container.
-  - &test_simple_in_container
-    language: bash
-    install:
-      - ls /proc/sys/fs/binfmt_misc/
-      - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-      - ls /proc/sys/fs/binfmt_misc/
-    script:
-      - "echo BASE_IMAGE: ${BASE_IMAGE}"
-      - docker run --rm -t "${BASE_IMAGE}" uname -a
-  # Current deprecated way.
-  # But it can be faster than above recommended way.
-  - &test_in_container_with_register
+  # The way to use compatible os images (multiarch's ubuntu image etc) is deprecated.
+  # But it might be faster than above recommended ways.
+  - &test_in_container_compatible_image
     language: bash
     install:
       - ls /proc/sys/fs/binfmt_misc/
@@ -83,10 +85,10 @@ matrix:
       env:
         - BASE_IMAGE=i386/ubuntu
       <<: *test_in_container
-    - name: ubuntu-i386-linux-register
+    - name: ubuntu-i386-linux-compatible-image
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:i386-bionic
-      <<: *test_in_container_with_register
+      <<: *test_in_container_compatible_image
     # ARM, 64-bit, Little-endian
     - name: ubuntu-aarch64-linux
       env:
@@ -98,10 +100,10 @@ matrix:
         - BASE_IMAGE=arm64v8/ubuntu
         - OS_NAME=ubuntu-qemu
       <<: *test_in_container_qemu_interpreter
-    - name: ubuntu-aarch64-linux-register
+    - name: ubuntu-aarch64-linux-compatible-image
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:arm64-bionic
-      <<: *test_in_container_with_register
+      <<: *test_in_container_compatible_image
     # ARM, 32-bit, Little-endian
     - name: ubuntu-arm32-linux
       env:
@@ -113,10 +115,10 @@ matrix:
         - BASE_IMAGE=arm32v7/ubuntu
         - OS_NAME=ubuntu-qemu
       <<: *test_in_container_qemu_interpreter
-    - name: ubuntu-arm32-linux-register
+    - name: ubuntu-arm32-linux-compatible-image
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:armhf-bionic
-      <<: *test_in_container_with_register
+      <<: *test_in_container_compatible_image
     # PowerPC, 64-bit, Little-endian
     - name: ubuntu-ppc64le-linux
       env:
@@ -140,10 +142,10 @@ matrix:
         - OS_NAME=ubuntu-qemu
       <<: *test_in_container_qemu_interpreter
     # PowerPC, 64-bit, Big-endian
-    - name: ubuntu-ppc64-linux-register
+    - name: ubuntu-ppc64-linux-compatible-image
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:powerpc-xenial
-      <<: *test_in_container_with_register
+      <<: *test_in_container_compatible_image
     # Intel, 32-bit, Little-endian
     - name: debian-i386-linux
       env:

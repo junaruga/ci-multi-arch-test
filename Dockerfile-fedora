@@ -4,8 +4,8 @@ ARG BASE_IMAGE=fedora
 FROM ${BASE_IMAGE}
 
 # Test with non-root user.
-ENV TEST_USER test
-ENV WORK_DIR "/build"
+ENV TEST_USER tester
+ENV WORK_DIR "/work"
 
 RUN uname -a
 RUN echo -e "deltarpm=0\ninstall_weak_deps=0\ntsflags=nodocs" >> /etc/dnf/dnf.conf
