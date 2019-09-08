@@ -85,6 +85,12 @@ matrix:
       env:
         - BASE_IMAGE=i386/ubuntu
       <<: *test_in_container
+    - name: ubuntu-i386-linux-qemu-interpreter
+      env:
+        - ARCH=i386
+        - BASE_IMAGE=i386/ubuntu
+        - OS_NAME=ubuntu-qemu
+      <<: *test_in_container_qemu_interpreter
     - name: ubuntu-i386-linux-compatible-image
       env:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:i386-bionic
