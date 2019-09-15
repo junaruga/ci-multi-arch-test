@@ -217,6 +217,12 @@ matrix:
         - BASE_IMAGE=s390x/fedora
         - OS_NAME=fedora
       <<: *test_in_container
+    # Intel, 64-bit, Little-endian
+    - name: rhel-x86_64-linux
+      env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
+        - OS_NAME=rhel
+      <<: *test_in_container
   allow_failures:
     # No package epel-release available.
     # https://travis-ci.org/junaruga/ci-multi-arch-test/jobs/568490418
