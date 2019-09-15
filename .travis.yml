@@ -234,7 +234,7 @@ matrix:
         - OS_NAME=fedora
       <<: *test_in_container
     # Intel, 64-bit, Little-endian
-    - name: rhel-x86_64-linux
+    - name: rhel-x86_64-linux-native
       env:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
         - OS_NAME=rhel
