@@ -19,7 +19,10 @@ os: linux
     language: bash
     install:
       - ls /proc/sys/fs/binfmt_misc/
-      - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+      - |
+        if [ "$(uname -m)" = x86_64 ]; then
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        fi
       - ls /proc/sys/fs/binfmt_misc/
       - |
         travis_retry docker build --rm -t sample \
@@ -68,6 +71,19 @@ os: linux
           .
     script:
       - docker run --rm -t sample ./sample_test.sh
+  - &inspect_image
+    addons:
+      apt:
+        config:
+          retries: true
+        update: true
+        sources:
+          - sourceline: 'ppa:projectatomic/ppa'
+        packages:
+          - jq
+          - skopeo
+    before_install:
+      - BASE_IMAGE="$BASE_IMAGE@$(script/print-arch-image-digest.sh)"
 
 matrix:
   include:
@@ -222,6 +238,38 @@ matrix:
       env:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
         - OS_NAME=rhel
+      <<: *test_in_container
+    # ARM, 64-bit, Little-endian
+    - name: rhel-aarch64-linux
+      env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
+        - OS_NAME=rhel
+        - INSPECTED_ARCH=arm64
+      <<: *inspect_image
+      <<: *test_in_container
+    # PowerPC, 64-bit, Little-endian
+    - name: rhel-ppc64le-linux-native
+      os: linux-ppc64le
+      env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
+        - OS_NAME=rhel
+      <<: *test_in_container
+    # "dnf -y update" ouptuts an error:
+    # "qemu: uncaught target signal 11 (Segmentation fault) - core dumped"
+    # - name: rhel-ppc64le-linux
+    #   env:
+    #     - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
+    #     - OS_NAME=rhel
+    #     - INSPECTED_ARCH=ppc64le
+    #   <<: *inspect_image
+    #   <<: *test_in_container
+    # IBM Z and LinuxONE, 64-bit, Big-endian
+    - name: rhel-s390x-linux
+      env:
+        - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
+        - OS_NAME=rhel
+        - INSPECTED_ARCH=s390x
+      <<: *inspect_image
       <<: *test_in_container
   allow_failures:
     # No package epel-release available.
