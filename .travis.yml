@@ -83,7 +83,7 @@ os: linux
           - jq
           - skopeo
     before_install:
-      - BASE_IMAGE="$BASE_IMAGE@$(script/print-arch-image-digest.sh)"
+      - BASE_IMAGE="$BASE_IMAGE@$(script/print-manifest-arch-digest.sh "$BASE_IMAGE" "$MANIFEST_ARCH")"
 
 matrix:
   include:
@@ -244,7 +244,7 @@ matrix:
       env:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
         - OS_NAME=rhel
-        - INSPECTED_ARCH=arm64
+        - MANIFEST_ARCH=arm64
       <<: *inspect_image
       <<: *test_in_container
     # PowerPC, 64-bit, Little-endian
@@ -260,7 +260,7 @@ matrix:
     #   env:
     #     - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
     #     - OS_NAME=rhel
-    #     - INSPECTED_ARCH=ppc64le
+    #     - MANIFEST_ARCH=ppc64le
     #   <<: *inspect_image
     #   <<: *test_in_container
     # IBM Z and LinuxONE, 64-bit, Big-endian
@@ -268,7 +268,7 @@ matrix:
       env:
         - BASE_IMAGE=registry.access.redhat.com/ubi8:8.0
         - OS_NAME=rhel
-        - INSPECTED_ARCH=s390x
+        - MANIFEST_ARCH=s390x
       <<: *inspect_image
       <<: *test_in_container
   allow_failures:
