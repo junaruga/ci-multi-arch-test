@@ -1,0 +1,38 @@
+---
+kind: pipeline
+type: docker
+name: arm64
+platform:
+  os: linux
+  arch: arm64
+steps:
+  - name: ubuntu-bionic
+    image: ubuntu:bionic
+    commands:
+      - uname -m
+      - apt-get -yq update
+      - apt-get -yq install gcc make file
+      - ./sample_test.sh
+# https://docker-runner.docs.drone.io/configuration/trigger/
+trigger:
+  branch:
+    - master
+
+---
+kind: pipeline
+type: docker
+name: arm32
+platform:
+  os: linux
+  arch: arm
+steps:
+  - name: ubuntu-bionic
+    image: ubuntu:bionic
+    commands:
+      - uname -m
+      - apt-get -yq update
+      - apt-get -yq install gcc make file
+      - ./sample_test.sh
+trigger:
+  branch:
+    - master
