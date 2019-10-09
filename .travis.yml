@@ -111,6 +111,8 @@ matrix:
         - BASE_IMAGE=multiarch/ubuntu-debootstrap:i386-bionic
       <<: *test_in_container_compatible_image
     # ARM, 64-bit, Little-endian
+    - name: ubuntu-aarch64-linux-native
+      arch: arm64
     - name: ubuntu-aarch64-linux
       env:
         - BASE_IMAGE=arm64v8/ubuntu
