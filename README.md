@@ -22,6 +22,10 @@ Node pools available for free.
 
 ![alt text](resources/shippable_node_pools.png "Shippable node pools")
 
+## Sister projects
+
+* [ci-multi-arch-native-test](https://github.com/junaruga/ci-multi-arch-native-test): this project is focusing the native architecture cases with Travis `arch: foo` and `setarch` command.
+
 ## References
 
 * [1] multiarch/qemu-user-static: https://github.com/multiarch/qemu-user-static
