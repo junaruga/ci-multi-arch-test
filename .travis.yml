@@ -274,6 +274,9 @@ matrix:
       <<: *inspect_image
       <<: *test_in_container
   allow_failures:
+    # `dnf update` on QEMU outputs core dump.
+    # https://travis-ci.org/junaruga/ci-multi-arch-test/jobs/617843947#L238
+    - name: fedora-ppc64le-linux
     # No package epel-release available.
     # https://travis-ci.org/junaruga/ci-multi-arch-test/jobs/568490418
     - name: centos-i386-linux
